@@ -50,8 +50,9 @@ class ActivityServiceImplTest {
         Long inspectorId = 1L;
         ActivityRequest request = new ActivityRequest();
         request.setTitle("Meeting");
-        request.setStartDateTime(LocalDateTime.of(2026, 5, 14, 10, 0));
-        request.setEndDateTime(LocalDateTime.of(2026, 5, 14, 11, 0));
+        LocalDateTime start = LocalDateTime.now().plusDays(1).withHour(10).withMinute(0).withSecond(0).withNano(0);
+        request.setStartDateTime(start);
+        request.setEndDateTime(start.plusHours(1));
         request.setOnline(false);
 
         User inspector = User.builder().id(inspectorId).build();
@@ -71,8 +72,9 @@ class ActivityServiceImplTest {
     void createActivity_InvalidTime_ThrowsException() {
         Long inspectorId = 1L;
         ActivityRequest request = new ActivityRequest();
-        request.setStartDateTime(LocalDateTime.of(2026, 5, 14, 12, 0));
-        request.setEndDateTime(LocalDateTime.of(2026, 5, 14, 11, 0)); // Start after end
+        LocalDateTime start = LocalDateTime.now().plusDays(1).withHour(12).withMinute(0).withSecond(0).withNano(0);
+        request.setStartDateTime(start);
+        request.setEndDateTime(start.minusHours(1)); // Start after end
 
         User inspector = User.builder().id(inspectorId).build();
         when(userRepository.findById(inspectorId)).thenReturn(Optional.of(inspector));
