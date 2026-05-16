@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { getUser, saveSession } from "../auth/session";
 import profileApi from "../api/profile";
+import { resolveServerUrl } from "../api/urls";
 import { Camera } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
@@ -296,9 +297,7 @@ export default function ProfileSetup() {
     
     const getAvatarUrl = (url) => {
       if (!url || url === "null") return null;
-      if (url.startsWith('http') || url.startsWith('data:image')) return url;
-      const baseUrl = profileApi.defaults?.baseURL || 'http://localhost:8081';
-      return `${baseUrl}${url.startsWith('/') ? '' : '/'}${url}`;
+      return resolveServerUrl(url);
     };
 
     const img = new Image();
@@ -457,7 +456,7 @@ export default function ProfileSetup() {
                         style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
                       >
                         <img 
-                          src={formData.profileImageUrl.startsWith('data:') ? formData.profileImageUrl : (profileApi.defaults?.baseURL || 'http://localhost:8081') + (formData.profileImageUrl.startsWith('/') ? '' : '/') + formData.profileImageUrl} 
+                          src={resolveServerUrl(formData.profileImageUrl)}
                           alt="Adjust" 
                           crossOrigin="anonymous"
                           draggable={false}

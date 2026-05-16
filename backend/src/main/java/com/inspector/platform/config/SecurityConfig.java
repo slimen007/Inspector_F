@@ -39,6 +39,9 @@ public class SecurityConfig {
     @Value("${app.cors.allowed-origins}")
     private String allowedOrigins;
 
+    @Value("${app.cors.allowed-origin-patterns:}")
+    private String allowedOriginPatterns;
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
@@ -74,6 +77,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/dashboard/teacher").hasRole("TEACHER")
                         .requestMatchers("/api/dashboard/responsible").hasRole("PEDAGOGICAL_RESPONSIBLE")
                         .requestMatchers("/api/dashboard/admin").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/healthz").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/actuator/health").permitAll()
                         .requestMatchers("/actuator/**").hasRole("ADMIN")
 
                         .requestMatchers("/uploads/**").permitAll()
@@ -113,8 +118,16 @@ public class SecurityConfig {
                                      .map(String::trim)
                                      .filter(s -> !s.isEmpty())
                                      .toList();
+
+        List<String> originPatterns = Arrays.stream(allowedOriginPatterns.split(","))
+                                            .map(String::trim)
+                                            .filter(s -> !s.isEmpty())
+                                            .toList();
         
         config.setAllowedOrigins(origins);
+        if (!originPatterns.isEmpty()) {
+            config.setAllowedOriginPatterns(originPatterns);
+        }
         config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         config.setAllowedHeaders(Arrays.asList("*"));
         config.setExposedHeaders(Arrays.asList("Authorization", "Content-Type"));
@@ -123,6 +136,7 @@ public class SecurityConfig {
         
         source.registerCorsConfiguration("/**", config);
         System.out.println("Consolidated CORS Filter Origins: " + origins);
+        System.out.println("Consolidated CORS Filter Origin Patterns: " + originPatterns);
         return new CorsFilter(source);
     }
 }

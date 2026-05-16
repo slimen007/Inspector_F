@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
 import { getToken } from "../auth/session";
+import { getApiBaseUrl, resolveServerUrl } from "../api/urls";
 
 export default function Messenger() {
   const { t } = useTranslation();
@@ -37,7 +38,7 @@ export default function Messenger() {
     loadContacts();
 
     const token = getToken();
-    const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:8081";
+    const API_BASE = getApiBaseUrl();
     // If API_BASE has a path like /api, remove it to get the server root for /ws
     const WS_URL = API_BASE.replace(/\/api$/, "") + "/ws";
 
@@ -201,8 +202,7 @@ export default function Messenger() {
   const getAvatarUrl = (url) => {
     if (!url || url === "null") return null;
     if (url.startsWith('http') || url.startsWith('data:image')) return url;
-    const baseUrl = api.defaults.baseURL || 'http://localhost:8081';
-    return `${baseUrl}${url.startsWith('/') ? '' : '/'}${url}`;
+    return resolveServerUrl(url);
   };
 
   return (
@@ -339,7 +339,7 @@ export default function Messenger() {
                           m.fileType && m.fileType.startsWith('image/') ? (
                             <div className="image-container">
                               <img 
-                                src={`http://localhost:8081${m.fileUrl}`} 
+                                src={resolveServerUrl(m.fileUrl)}
                                 alt={m.fileName} 
                                 className="chat-image selectable" 
                                 onClick={() => setInspectedImage({url: m.fileUrl, name: m.fileName})}
@@ -350,7 +350,7 @@ export default function Messenger() {
                               <div className="file-icon"><FileText size={24} /></div>
                               <div className="file-details">
                                 <span className="filename">{m.fileName}</span>
-                                <a href={`http://localhost:8081${m.fileUrl}`} target="_blank" rel="noreferrer">{t('download')}</a>
+                                <a href={resolveServerUrl(m.fileUrl)} target="_blank" rel="noreferrer">{t('download')}</a>
                               </div>
                             </div>
                           )
@@ -406,7 +406,7 @@ export default function Messenger() {
             <span className="overlay-filename">{inspectedImage.name}</span>
             <div className="overlay-actions">
               <a 
-                href={`http://localhost:8081${inspectedImage.url}`} 
+                href={resolveServerUrl(inspectedImage.url)}
                 target="_blank" 
                 rel="noreferrer" 
                 className="overlay-download-btn"
@@ -424,7 +424,7 @@ export default function Messenger() {
           </div>
           <div className="overlay-content-wrapper">
             <img 
-              src={`http://localhost:8081${inspectedImage.url}`} 
+              src={resolveServerUrl(inspectedImage.url)}
               alt={inspectedImage.name} 
               className="overlay-image" 
               onClick={(e) => e.stopPropagation()}

@@ -1,8 +1,9 @@
 import axios from "axios";
 import { getToken, clearSession } from "../auth/session";
+import { getApiBaseUrl } from "./urls";
 
 const http = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || "http://localhost:8081/api",
+  baseURL: getApiBaseUrl(),
 });
 
 http.interceptors.request.use((config) => {
